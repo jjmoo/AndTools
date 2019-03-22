@@ -1,0 +1,24 @@
+group 'com.jjmoo'
+version '0.1'
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    //noinspection GradleDependency
+    implementation 'org.ow2.asm:asm:5.1'
+    implementation 'commons-io:commons-io:2.6'
+    //noinspection GradleDependency
+    implementation 'com.android.tools.build:gradle-api:3.2.1'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.artifactId = 'appjoint-plugin'
+            repository(url: uri('../../repo'))
+        }
+    }
+}

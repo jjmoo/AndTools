@@ -1,0 +1,11 @@
+include ':app'
+
+include ':andutil'
+project(":andutil").projectDir = new File("./module/andutil")
+
+include ':appjoint'
+project(":appjoint").projectDir = new File("./module/appjoint")
+
+include ':appjoint-plugin'
+project(":appjoint-plugin").projectDir = new File("./module/appjoint-plugin")
+
