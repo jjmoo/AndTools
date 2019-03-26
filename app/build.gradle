@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'appjoint-plugin'
+//apply plugin: 'appjoint-plugin'
 
 android {
     compileSdkVersion 28
