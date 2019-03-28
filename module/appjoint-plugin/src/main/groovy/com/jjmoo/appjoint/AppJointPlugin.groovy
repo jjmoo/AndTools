@@ -103,18 +103,21 @@ class AppJointPlugin implements Plugin<Project> {
                     openedJar[unzipDir] = dest
                 }
             }
-            log(TAG,  "========================================")
-            log(TAG,  "start to transform ...")
-            log(TAG,  "----------------------------------------")
+            logD(TAG,  "========================================")
+            logD(TAG,  "start to transform ...")
+            logD(TAG,  "----------------------------------------")
             if (null != mAppInfo && null != mAppLikeInfo) {
                 handleTargetClasses()
+            } else {
+                logE(TAG, "Fatal error: failed to find Application and AppLike.")
             }
-            log(TAG,  "----------------------------------------")
+            logD(TAG,  "----------------------------------------")
             openedJar.each { unzipDir, dest ->
-                log(TAG,  "" + dest + " <-- " + unzipDir.name)
+                logD(TAG,  "" + dest + " <-- " + unzipDir.name)
                 compress(unzipDir, dest)
+                unzipDir.deleteDir()
             }
-            log(TAG,  "========================================")
+            logD(TAG,  "========================================")
         }
 
         private void findTargetClass(File file, File baseDir, File outDir) {
@@ -232,7 +235,7 @@ class AppJointPlugin implements Plugin<Project> {
             void visitEnd() {
                 mMethodDefined.each { name, defined ->
                     if (!defined) {
-                        log(TAG,  "add lifecycle method: " + name)
+                        logD(TAG,  "add lifecycle method: " + name)
                         String desc = mMethodDesc[name]
                         int access = "attachBaseContext" == name ? 4 : 1
                         MethodVisitor mv = visitMethod(access, name, desc, null, null)
@@ -271,7 +274,7 @@ class AppJointPlugin implements Plugin<Project> {
             @Override
             void visitInsn(int opcode) {
                 if (Opcodes.RETURN == opcode) {
-                    log(TAG,  "insert code to call AppLike's lifecycle: " + name)
+                    logD(TAG,  "insert code to call AppLike's lifecycle: " + name)
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, mAppLikeInfo.name, "getInstance",
                             "()L" + mAppLikeInfo.name + ";", false)
                     switch (name) {
@@ -306,7 +309,7 @@ class AppJointPlugin implements Plugin<Project> {
                         void visitInsn(int opcode) {
                             if (Opcodes.RETURN == opcode) {
                                 mModuleSpecs.each { clazz ->
-                                    log(TAG,  "insert code to add module's " +
+                                    logD(TAG,  "insert code to add module's " +
                                             "application: " + clazz)
                                     mv.visitVarInsn(Opcodes.ALOAD, 0)
                                     mv.visitTypeInsn(Opcodes.NEW, clazz)
@@ -344,7 +347,7 @@ class AppJointPlugin implements Plugin<Project> {
                         void visitInsn(int opcode) {
                             if (Opcodes.RETURN == opcode) {
                                 mModulesServices.each { i, impl ->
-                                    log(TAG,  "insert code to add module's " +
+                                    logD(TAG,  "insert code to add module's " +
                                             "service: " + impl)
                                     mv.visitLdcInsn(Type.getObjectType(i))
                                     mv.visitLdcInsn(Type.getObjectType(impl))
@@ -378,8 +381,12 @@ class AppJointPlugin implements Plugin<Project> {
                 return name.toString() + ": " + source
             }
         }
-        
-        private void log(String tag, String msg) {
+
+        private void logD(String tag, String msg) {
+//            mProject.logging.println(tag + msg)
+        }
+
+        private void logE(String tag, String msg) {
             mProject.logging.println(tag + msg)
         }
 
