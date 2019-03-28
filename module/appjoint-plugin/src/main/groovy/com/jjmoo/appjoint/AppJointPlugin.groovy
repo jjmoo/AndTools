@@ -63,7 +63,8 @@ class AppJointPlugin implements Plugin<Project> {
         Set<? super QualifiedContent.Scope> getScopes() {
             return Sets.immutableEnumSet(
                     QualifiedContent.Scope.PROJECT,
-                    QualifiedContent.Scope.SUB_PROJECTS
+                    QualifiedContent.Scope.SUB_PROJECTS,
+                    QualifiedContent.Scope.EXTERNAL_LIBRARIES
             )
         }
 
@@ -102,16 +103,18 @@ class AppJointPlugin implements Plugin<Project> {
                     openedJar[unzipDir] = dest
                 }
             }
-            mProject.logging.println(TAG + "========================================")
-            mProject.logging.println(TAG + "start to transform ...")
-            mProject.logging.println(TAG + "----------------------------------------")
-            handleTargetClasses()
-            mProject.logging.println(TAG + "----------------------------------------")
+            log(TAG,  "========================================")
+            log(TAG,  "start to transform ...")
+            log(TAG,  "----------------------------------------")
+            if (null != mAppInfo && null != mAppLikeInfo) {
+                handleTargetClasses()
+            }
+            log(TAG,  "----------------------------------------")
             openedJar.each { unzipDir, dest ->
-                mProject.logging.println(TAG + dest + " <-- " + unzipDir.name)
+                log(TAG,  "" + dest + " <-- " + unzipDir.name)
                 compress(unzipDir, dest)
             }
-            mProject.logging.println(TAG + "========================================")
+            log(TAG,  "========================================")
         }
 
         private void findTargetClass(File file, File baseDir, File outDir) {
@@ -229,7 +232,7 @@ class AppJointPlugin implements Plugin<Project> {
             void visitEnd() {
                 mMethodDefined.each { name, defined ->
                     if (!defined) {
-                        mProject.logging.println(TAG + "add lifecycle method: " + name)
+                        log(TAG,  "add lifecycle method: " + name)
                         String desc = mMethodDesc[name]
                         int access = "attachBaseContext" == name ? 4 : 1
                         MethodVisitor mv = visitMethod(access, name, desc, null, null)
@@ -268,7 +271,7 @@ class AppJointPlugin implements Plugin<Project> {
             @Override
             void visitInsn(int opcode) {
                 if (Opcodes.RETURN == opcode) {
-                    mProject.logging.println(TAG + "insert code to call AppLike's lifecycle: " + name)
+                    log(TAG,  "insert code to call AppLike's lifecycle: " + name)
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, mAppLikeInfo.name, "getInstance",
                             "()L" + mAppLikeInfo.name + ";", false)
                     switch (name) {
@@ -303,7 +306,7 @@ class AppJointPlugin implements Plugin<Project> {
                         void visitInsn(int opcode) {
                             if (Opcodes.RETURN == opcode) {
                                 mModuleSpecs.each { clazz ->
-                                    mProject.logging.println(TAG + "insert code to add module's " +
+                                    log(TAG,  "insert code to add module's " +
                                             "application: " + clazz)
                                     mv.visitVarInsn(Opcodes.ALOAD, 0)
                                     mv.visitTypeInsn(Opcodes.NEW, clazz)
@@ -341,7 +344,7 @@ class AppJointPlugin implements Plugin<Project> {
                         void visitInsn(int opcode) {
                             if (Opcodes.RETURN == opcode) {
                                 mModulesServices.each { i, impl ->
-                                    mProject.logging.println(TAG + "insert code to add module's " +
+                                    log(TAG,  "insert code to add module's " +
                                             "service: " + impl)
                                     mv.visitLdcInsn(Type.getObjectType(i))
                                     mv.visitLdcInsn(Type.getObjectType(impl))
@@ -374,6 +377,10 @@ class AppJointPlugin implements Plugin<Project> {
             String toString() {
                 return name.toString() + ": " + source
             }
+        }
+        
+        private void log(String tag, String msg) {
+            mProject.logging.println(tag + msg)
         }
 
         private static void decompress(File inFile, File outDir) {

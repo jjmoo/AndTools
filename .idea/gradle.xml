@@ -9,7 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/module/andutil" />
+            <option value="$PROJECT_DIR$/module/andutils" />
             <option value="$PROJECT_DIR$/module/appjoint" />
             <option value="$PROJECT_DIR$/module/appjoint-plugin" />
           </set>

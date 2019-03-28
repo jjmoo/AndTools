@@ -1,7 +1,7 @@
 include ':app'
 
-include ':andutil'
-project(":andutil").projectDir = new File("./module/andutil")
+include ':andutils'
+project(":andutils").projectDir = new File("./module/andutils")
 
 include ':appjoint'
 project(":appjoint").projectDir = new File("./module/appjoint")
