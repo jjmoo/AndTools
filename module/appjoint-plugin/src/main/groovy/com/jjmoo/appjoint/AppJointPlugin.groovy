@@ -89,18 +89,22 @@ class AppJointPlugin implements Plugin<Project> {
                 input.jarInputs.each { jarInput ->
                     def jarFile = jarInput.file
                     def jarName = jarInput.name
-                    File unzipDir = new File(jarFile.getParent(),
-                            jarName.replace(":", "") + "_unzip")
-                    if (!unzipDir.exists()) {
-                        unzipDir.mkdirs()
-                    }
-                    decompress(jarFile, unzipDir)
-                    unzipDir.eachFileRecurse(FileType.FILES) { file ->
-                        findTargetClass(file, unzipDir, unzipDir)
-                    }
                     def dest = transformInvocation.outputProvider.getContentLocation(
                             jarName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
-                    openedJar[unzipDir] = dest
+                    if (jarName.startsWith(":") || jarName.contains("appjoint")) {
+                        File unzipDir = new File(jarFile.getParent(),
+                                jarName.replace(":", "") + "_unzip")
+                        if (!unzipDir.exists()) {
+                            unzipDir.mkdirs()
+                        }
+                        decompress(jarFile, unzipDir)
+                        unzipDir.eachFileRecurse(FileType.FILES) { file ->
+                            findTargetClass(file, unzipDir, unzipDir)
+                        }
+                        openedJar[unzipDir] = dest
+                    } else {
+                        FileUtils.copyFile(jarFile, dest)
+                    }
                 }
             }
             logD(TAG,  "========================================")
@@ -382,6 +386,7 @@ class AppJointPlugin implements Plugin<Project> {
             }
         }
 
+        @SuppressWarnings("GroovyUnusedDeclaration")
         private void logD(String tag, String msg) {
 //            mProject.logging.println(tag + msg)
         }
