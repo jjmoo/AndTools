@@ -39,7 +39,7 @@ public class JmLog {
 
     public static void setup(Context context, String tagPrefix, boolean debug, boolean saveToFile) {
         sDebug = debug;
-        if (null != tagPrefix && !tagPrefix.isEmpty()) {
+        if (null != tagPrefix && !tagPrefix.isEmpty() && TAG.equals(sPrefix)) {
             sPrefix = tagPrefix;
         }
         try {

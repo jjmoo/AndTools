@@ -1,5 +1,8 @@
 package com.jjmoo.appjoint;
 
+import android.content.Context;
+
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,12 +22,22 @@ public class AppJoint {
         if (null == result) {
             Class<?> impl = sImplClassMap.get(clazz);
             if (null != impl) {
+                boolean succeed = false;
                 try {
                     result = (T) impl.newInstance();
-                    sInstanceMap.put(clazz, result);
+                    succeed = true;
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    //ignore
                 }
+                if (!succeed) {
+                    try {
+                        Constructor constructor = impl.getConstructor(Context.class);
+                        result = (T) constructor.newInstance(AppLike.getInstance().getContext());
+                    } catch (Exception e) {
+                        throw new RuntimeException("no available constructor found", e);
+                    }
+                }
+                sInstanceMap.put(clazz, result);
             } else {
                 throw new RuntimeException("no such kind of service!");
             }

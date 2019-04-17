@@ -1,5 +1,6 @@
 package com.jjmoo.appjoint;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -19,6 +20,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class AppLike {
     private List<Application> mApplications = new ArrayList<>();
+    private Context mBase;
 
     private AppLike() {}
 
@@ -26,7 +28,12 @@ public class AppLike {
         return SingletonHolder.INSTANCE;
     }
 
+    public Application getContext() {
+        return (Application) mBase.getApplicationContext();
+    }
+
     public synchronized void attachBaseContext(Context base) {
+        mBase = base;
         for (Application application : mApplications) {
             try {
                 Method attachBaseContext = ContextWrapper.class.getDeclaredMethod(
@@ -74,6 +81,7 @@ public class AppLike {
     }
 
     private static class SingletonHolder {
+        @SuppressLint("StaticFieldLeak")
         private static final AppLike INSTANCE = new AppLike();
     }
 }
