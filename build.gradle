@@ -1,12 +1,12 @@
 buildscript {
     ext.kotlin_version = '1.2.71'
 
-    ext.library_version_name = "0.2-LOCAL"
-//    ext.library_version_name = "0.2-SNAPSHOT"
-//    ext.library_version_name = "0.2"
+    ext.library_version_name = "0.3-LOCAL"
+//    ext.library_version_name = "0.3-SNAPSHOT"
+//    ext.library_version_name = "0.3"
 
     repositories {
-//        maven { url './repo' }
+        maven { url './repo' }
         google()
         jcenter()
         mavenCentral()
@@ -15,7 +15,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         //noinspection GradleDependency
         classpath 'com.android.tools.build:gradle:3.2.1'
-        classpath "com.jjmoo:appjoint-plugin:0.2"
+        classpath "com.jjmoo:appjoint-plugin:0.3-LOCAL"
     }
 }
 

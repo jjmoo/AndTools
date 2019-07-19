@@ -10,6 +10,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.Nullable;
+
 /**
  * Descriptions
  * <p><br>
@@ -28,8 +30,9 @@ public class AppLike {
         return SingletonHolder.INSTANCE;
     }
 
+    @Nullable
     public Application getContext() {
-        return (Application) mBase.getApplicationContext();
+        return null == mBase ? null : (Application) mBase.getApplicationContext();
     }
 
     public synchronized void attachBaseContext(Context base) {

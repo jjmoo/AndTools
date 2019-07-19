@@ -9,13 +9,7 @@ import com.google.common.collect.Sets
 import groovy.io.FileType
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.objectweb.asm.AnnotationVisitor
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
+import org.objectweb.asm.*
 
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
@@ -107,21 +101,21 @@ class AppJointPlugin implements Plugin<Project> {
                     }
                 }
             }
-            logD(TAG,  "========================================")
-            logD(TAG,  "start to transform ...")
-            logD(TAG,  "----------------------------------------")
+            logD(TAG, "========================================")
+            logD(TAG, "start to transform ...")
+            logD(TAG, "----------------------------------------")
             if (null != mAppInfo && null != mAppLikeInfo) {
                 handleTargetClasses()
             } else {
                 logE(TAG, "Fatal error: failed to find Application and AppLike.")
             }
-            logD(TAG,  "----------------------------------------")
+            logD(TAG, "----------------------------------------")
             openedJar.each { unzipDir, dest ->
-                logD(TAG,  "" + dest + " <-- " + unzipDir.name)
+                logD(TAG, "" + dest + " <-- " + unzipDir.name)
                 compress(unzipDir, dest)
                 unzipDir.deleteDir()
             }
-            logD(TAG,  "========================================")
+            logD(TAG, "========================================")
         }
 
         private void findTargetClass(File file, File baseDir, File outDir) {
@@ -145,19 +139,22 @@ class AppJointPlugin implements Plugin<Project> {
                     AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                         switch (desc) {
                             case "Lcom/jjmoo/appjoint/annotation/AppSpec;":
-                                if (null == mAppInfo) {
-                                    mAppInfo = new ClassInfo(cr.className, file, baseDir, outDir)
-                                } else {
-                                    throw new IllegalArgumentException(
-                                            "there are more than one application classes")
-                                }
+                                logD(TAG, "findTargetClass: add app spec: " + cr.className)
+                                mAppInfo = new ClassInfo(cr.className, file, baseDir, outDir)
                                 break
                             case "Lcom/jjmoo/appjoint/annotation/ModuleSpec;":
-                                mModuleSpecs.add(cr.className)
+                                if (!mModuleSpecs.contains(cr.className)) {
+                                    logD(TAG, "findTargetClass: add module spec: " + cr.className)
+                                    mModuleSpecs.add(cr.className)
+                                }
                                 break
                             case "Lcom/jjmoo/appjoint/annotation/ServiceProvider;":
                                 cr.interfaces.each {
-                                    mModulesServices[it] = cr.className
+                                    if (!mModulesServices.containsKey(it)) {
+                                        logD(TAG, "findTargetClass: add module service: " + it +
+                                                " --> " + cr.className)
+                                        mModulesServices[it] = cr.className
+                                    }
                                 }
                                 break
                             default:
@@ -171,6 +168,19 @@ class AppJointPlugin implements Plugin<Project> {
         }
 
         private void handleTargetClasses() {
+            logD(TAG, "****************************************")
+            logD(TAG, "\n\nhandleTargetClasses: mModulesInfo: \n\n" + mAppInfo)
+            logD(TAG, "\n\nhandleTargetClasses: mAppLikeInfo: \n\n" + mAppLikeInfo)
+            logD(TAG, "\n\nhandleTargetClasses: mModulesInfo: \n\n" + mModulesInfo)
+            logD(TAG, "\n\nhandleTargetClasses: mModuleSpecs: \n")
+            mModuleSpecs.each {
+                logD(TAG, "handleTargetClasses: " + it)
+            }
+            logD(TAG, "\n\nhandleTargetClasses: mModulesServices: \n")
+            mModulesServices.each {
+                logD(TAG, "handleTargetClasses: " + it)
+            }
+            logD(TAG, "\n\n****************************************")
             handleAppSpec()
             handleModuleSpec()
             handleServiceProvider()
@@ -239,7 +249,7 @@ class AppJointPlugin implements Plugin<Project> {
             void visitEnd() {
                 mMethodDefined.each { name, defined ->
                     if (!defined) {
-                        logD(TAG,  "add lifecycle method: " + name)
+                        logD(TAG, "add lifecycle method: " + name)
                         String desc = mMethodDesc[name]
                         int access = "attachBaseContext" == name ? 4 : 1
                         MethodVisitor mv = visitMethod(access, name, desc, null, null)
@@ -278,7 +288,7 @@ class AppJointPlugin implements Plugin<Project> {
             @Override
             void visitInsn(int opcode) {
                 if (Opcodes.RETURN == opcode) {
-                    logD(TAG,  "insert code to call AppLike's lifecycle: " + name)
+                    logD(TAG, "insert code to call AppLike's lifecycle: " + name)
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, mAppLikeInfo.name, "getInstance",
                             "()L" + mAppLikeInfo.name + ";", false)
                     switch (name) {
@@ -292,7 +302,8 @@ class AppJointPlugin implements Plugin<Project> {
                         default:
                             break
                     }
-                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mAppLikeInfo.name, name, desc, false)
+                    mv.visitMethodInsn(
+                            Opcodes.INVOKEVIRTUAL, mAppLikeInfo.name, name, desc, false)
                 }
                 super.visitInsn(opcode)
             }
@@ -312,13 +323,13 @@ class AppJointPlugin implements Plugin<Project> {
                         @Override
                         void visitInsn(int opcode) {
                             if (Opcodes.RETURN == opcode) {
-                                mModuleSpecs.each { clazz ->
-                                    logD(TAG,  "insert code to add module's " +
-                                            "application: " + clazz)
+                                mModuleSpecs.each {
+                                    logD(TAG, "insert code to add module's " +
+                                            "application: " + it)
                                     mv.visitVarInsn(Opcodes.ALOAD, 0)
-                                    mv.visitTypeInsn(Opcodes.NEW, clazz)
+                                    mv.visitTypeInsn(Opcodes.NEW, it)
                                     mv.visitInsn(Opcodes.DUP)
-                                    mv.visitMethodInsn(Opcodes.INVOKESPECIAL, clazz,
+                                    mv.visitMethodInsn(Opcodes.INVOKESPECIAL, it,
                                             "<init>", "()V", false)
                                     mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mAppLikeInfo.name,
                                             "addModuleApplication",
@@ -351,7 +362,7 @@ class AppJointPlugin implements Plugin<Project> {
                         void visitInsn(int opcode) {
                             if (Opcodes.RETURN == opcode) {
                                 mModulesServices.each { i, impl ->
-                                    logD(TAG,  "insert code to add module's " +
+                                    logD(TAG, "insert code to add module's " +
                                             "service: " + impl)
                                     mv.visitLdcInsn(Type.getObjectType(i))
                                     mv.visitLdcInsn(Type.getObjectType(impl))
@@ -411,7 +422,8 @@ class AppJointPlugin implements Plugin<Project> {
                 if (!entry.isDirectory()) {
                     ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE)
                     FileChannel outChannel = new FileOutputStream(outFile).getChannel()
-                    ReadableByteChannel inChannel = Channels.newChannel(jarFile.getInputStream(entry))
+                    ReadableByteChannel inChannel =
+                            Channels.newChannel(jarFile.getInputStream(entry))
                     while (0 <= inChannel.read(buf)) {
                         buf.flip()
                         outChannel.write(buf)
@@ -428,7 +440,7 @@ class AppJointPlugin implements Plugin<Project> {
             CheckedOutputStream cos = new CheckedOutputStream(fos, new CRC32())
             ZipOutputStream zos = new ZipOutputStream(cos)
             int baseLen = inDir.toString().length() + 1
-            byte [] buf = new byte[BUFFER_SIZE]
+            byte[] buf = new byte[BUFFER_SIZE]
             inDir.eachFileRecurse(FileType.FILES) { file ->
                 BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))
                 ZipEntry entry = new ZipEntry(file.toString().substring(baseLen))
