@@ -17,6 +17,7 @@ import java.nio.channels.FileChannel
 import java.nio.channels.ReadableByteChannel
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
+import java.util.stream.Stream
 import java.util.zip.CRC32
 import java.util.zip.CheckedOutputStream
 import java.util.zip.ZipEntry
@@ -86,7 +87,7 @@ class AppJointPlugin implements Plugin<Project> {
                     def dest = transformInvocation.outputProvider.getContentLocation(
                             jarName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
                     if (jarName.startsWith(":") || jarName.contains("appjoint")) {
-                        File unzipDir = new File(jarFile.getParent(),
+                        File unzipDir = new File(dest.getParent(),
                                 jarName.replace(":", "") + "_unzip")
                         if (!unzipDir.exists()) {
                             unzipDir.mkdirs()
@@ -110,6 +111,17 @@ class AppJointPlugin implements Plugin<Project> {
                 logE(TAG, "Fatal error: failed to find Application and AppLike.")
             }
             logD(TAG, "----------------------------------------")
+            def appLikePath = mAppLikeInfo.target.toString()
+            def tmpPath = appLikePath.substring(0, appLikePath.indexOf(mAppLikeInfo.name) - 1)
+            def outputDir = tmpPath.substring(0, tmpPath.lastIndexOf('/')) + '/00'
+            Stream.of(mAppLikeInfo, mAppInfo, mModulesInfo).each {
+                def source = it.target.toString()
+                def target = new File(outputDir + '/' + source.substring(source.indexOf(it.name)))
+                if (!target.getParentFile().exists()) {
+                    target.getParentFile().mkdirs()
+                }
+                FileUtils.copyFile(it.target, target)
+            }
             openedJar.each { unzipDir, dest ->
                 logD(TAG, "" + dest + " <-- " + unzipDir.name)
                 compress(unzipDir, dest)
