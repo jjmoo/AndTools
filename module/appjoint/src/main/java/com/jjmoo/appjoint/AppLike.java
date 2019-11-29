@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
+import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,8 +20,11 @@ import androidx.annotation.Nullable;
  * @author Zohn
  *
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess", "MismatchedQueryAndUpdateOfCollection"})
 public class AppLike {
+    private static final String TAG = "AppJoint/AppLike";
+
+    private List<String> mApplicationClassNames = new ArrayList<>();
     private List<Application> mApplications = new ArrayList<>();
     private Context mBase;
 
@@ -79,8 +83,19 @@ public class AppLike {
         }
     }
 
-    protected synchronized void addModuleApplication(Application application) {
-        mApplications.add(application);
+    private synchronized void addModuleAppName(String className) {
+        mApplicationClassNames.add(className);
+    }
+
+    private synchronized void initModuleApp() {
+        for (String name : mApplicationClassNames) {
+            String className = name.replaceAll("/", ".");
+            try {
+                mApplications.add((Application) Class.forName(className).newInstance());
+            } catch (Exception e) {
+                Log.w(TAG, "failed to add application: " + className);
+            }
+        }
     }
 
     private static class SingletonHolder {

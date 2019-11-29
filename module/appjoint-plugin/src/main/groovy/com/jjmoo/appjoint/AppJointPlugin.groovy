@@ -339,14 +339,14 @@ class AppJointPlugin implements Plugin<Project> {
                                     logD(TAG, "insert code to add module's " +
                                             "application: " + it)
                                     mv.visitVarInsn(Opcodes.ALOAD, 0)
-                                    mv.visitTypeInsn(Opcodes.NEW, it)
-                                    mv.visitInsn(Opcodes.DUP)
-                                    mv.visitMethodInsn(Opcodes.INVOKESPECIAL, it,
-                                            "<init>", "()V", false)
-                                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mAppLikeInfo.name,
-                                            "addModuleApplication",
-                                            "(Landroid/app/Application;)V", false)
+                                    mv.visitLdcInsn(it)
+                                    mv.visitMethodInsn(Opcodes.INVOKESPECIAL, mAppLikeInfo.name,
+                                            "addModuleAppName",
+                                            "(Ljava/lang/String;)V", false)
                                 }
+                                mv.visitVarInsn(Opcodes.ALOAD, 0)
+                                mv.visitMethodInsn(Opcodes.INVOKESPECIAL, mAppLikeInfo.name,
+                                        "initModuleApp", "()V", false)
                             }
                             super.visitInsn(opcode)
                         }

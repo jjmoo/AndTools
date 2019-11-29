@@ -2,8 +2,8 @@ buildscript {
     ext.kotlin_version = '1.2.71'
 
     ext.library_version_name = "0.4-LOCAL"
-//    ext.library_version_name = "0.3-SNAPSHOT"
-//    ext.library_version_name = "0.3"
+//    ext.library_version_name = "0.4-SNAPSHOT"
+//    ext.library_version_name = "0.4"
 
     repositories {
         maven { url './repo' }
