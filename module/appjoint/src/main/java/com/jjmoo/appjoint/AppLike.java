@@ -1,13 +1,17 @@
 package com.jjmoo.appjoint;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
+import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.Nullable;
 
 /**
  * Descriptions
@@ -16,9 +20,13 @@ import java.util.List;
  * @author Zohn
  *
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess", "MismatchedQueryAndUpdateOfCollection"})
 public class AppLike {
+    private static final String TAG = "AppJoint/AppLike";
+
+    private List<String> mApplicationClassNames = new ArrayList<>();
     private List<Application> mApplications = new ArrayList<>();
+    private Context mBase;
 
     private AppLike() {}
 
@@ -26,7 +34,13 @@ public class AppLike {
         return SingletonHolder.INSTANCE;
     }
 
+    @Nullable
+    public Application getContext() {
+        return null == mBase ? null : (Application) mBase.getApplicationContext();
+    }
+
     public synchronized void attachBaseContext(Context base) {
+        mBase = base;
         for (Application application : mApplications) {
             try {
                 Method attachBaseContext = ContextWrapper.class.getDeclaredMethod(
@@ -69,11 +83,23 @@ public class AppLike {
         }
     }
 
-    protected synchronized void addModuleApplication(Application application) {
-        mApplications.add(application);
+    private synchronized void addModuleAppName(String className) {
+        mApplicationClassNames.add(className);
+    }
+
+    private synchronized void initModuleApp() {
+        for (String name : mApplicationClassNames) {
+            String className = name.replaceAll("/", ".");
+            try {
+                mApplications.add((Application) Class.forName(className).newInstance());
+            } catch (Exception e) {
+                Log.w(TAG, "failed to add application: " + className);
+            }
+        }
     }
 
     private static class SingletonHolder {
+        @SuppressLint("StaticFieldLeak")
         private static final AppLike INSTANCE = new AppLike();
     }
 }

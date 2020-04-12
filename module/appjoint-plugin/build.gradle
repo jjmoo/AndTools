@@ -1,17 +1,6 @@
-group 'com.jjmoo'
-version '0.2-LOCAL'
-//version '0.2-SNAPSHOT'
-//version '0.2'
-
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
-
-String artifactName = 'appjoint-plugin'
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-String nexusUserName = properties.get('nexus.username')
-String nexusPassword = properties.get('nexus.password')
 
 dependencies {
     implementation gradleApi()
@@ -22,6 +11,14 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.android.tools.build:gradle-api:3.2.1'
 }
+
+group 'com.jjmoo'
+version "$library_version_name"
+String artifactName = 'appjoint-plugin'
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+String nexusUserName = properties.get('nexus.username')
+String nexusPassword = properties.get('nexus.password')
 
 def getUrl() {
     if (version.endsWith("LOCAL")) {
@@ -81,7 +78,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-    archives jar
     archives sourcesJar
     archives javadocJar
 }

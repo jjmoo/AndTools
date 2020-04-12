@@ -24,7 +24,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
-
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     //noinspection GradleDependency
@@ -40,5 +39,10 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
 
     implementation project(':andutils')
-    implementation files('libs/appjoint-0.1.jar')
+    implementation project(':appjoint')
+}
+
+repositories {
+    maven { url '../repo' }
+    mavenCentral()
 }
