@@ -40,6 +40,7 @@ dependencies {
 
     implementation project(':andutils')
     implementation project(':appjoint')
+    implementation project(':andlogger')
 }
 
 repositories {

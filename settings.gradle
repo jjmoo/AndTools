@@ -9,3 +9,5 @@ project(":appjoint").projectDir = new File("./module/appjoint")
 include ':appjoint-plugin'
 project(":appjoint-plugin").projectDir = new File("./module/appjoint-plugin")
 
+include ':andlogger'
+project(":andlogger").projectDir = new File("./module/andlogger")
