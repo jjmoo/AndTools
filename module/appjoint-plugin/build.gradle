@@ -13,7 +13,7 @@ dependencies {
 }
 
 group 'com.jjmoo'
-version "$library_version_name"
+version "$library_appjoint_version"
 String artifactName = 'appjoint-plugin'
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())

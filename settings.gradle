@@ -1,13 +1,10 @@
 include ':app'
 
-include ':andutils'
-project(":andutils").projectDir = new File("./module/andutils")
-
-include ':appjoint'
-project(":appjoint").projectDir = new File("./module/appjoint")
+include ':appjoint-core'
+project(":appjoint-core").projectDir = new File("./module/appjoint-core")
 
 include ':appjoint-plugin'
 project(":appjoint-plugin").projectDir = new File("./module/appjoint-plugin")
 
-include ':andlogger'
-project(":andlogger").projectDir = new File("./module/andlogger")
+include ':android-logger'
+project(":android-logger").projectDir = new File("./module/android-logger")

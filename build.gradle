@@ -1,10 +1,17 @@
 buildscript {
-    ext.kotlin_version = '1.3.71'
-    ext.kotlin_version = '1.2.71'
+    ext.build_tools_version = '29.0.2'
+    ext.compile_sdk_version = 29
+    ext.min_sdk_version = 23
+    ext.target_sdk_version = 29
 
-    ext.library_version_name = "0.4-LOCAL"
-//    ext.library_version_name = "0.4-SNAPSHOT"
-//    ext.library_version_name = "0.4"
+    ext.kotlin_version = '1.3.71'
+
+    ext.library_version_type = "-LOCAL"
+//    ext.library_version_type = "-SNAPSHOT"
+//    ext.library_version_type = ""
+
+    ext.library_appjoint_version = "0.4" + library_version_type
+    ext.library_logger_version = "0.1" + library_version_type
 
     repositories {
         maven { url './repo' }

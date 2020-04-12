@@ -4,11 +4,14 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'appjoint-plugin'
 
 android {
-    compileSdkVersion 28
+    //noinspection GradleDependency
+    buildToolsVersion "$build_tools_version"
+    compileSdkVersion "$compile_sdk_version".toInteger()
     defaultConfig {
+        minSdkVersion "$min_sdk_version".toInteger()
+        targetSdkVersion "$target_sdk_version".toInteger()
+
         applicationId "com.jjmoo.andtools"
-        minSdkVersion 15
-        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -38,9 +41,8 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
 
-    implementation project(':andutils')
-    implementation project(':appjoint')
-    implementation project(':andlogger')
+    implementation 'com.jjmoo:appjoint-core:0.4-LOCAL'
+    implementation 'com.jjmoo:android-logger:0.1-LOCAL'
 }
 
 repositories {

@@ -3,12 +3,12 @@ package com.jjmoo.appjoint;
 import android.app.Application;
 import android.content.Context;
 
+import androidx.annotation.CheckResult;
+import androidx.annotation.Nullable;
+
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
-
-import androidx.annotation.CheckResult;
-import androidx.annotation.Nullable;
 
 /**
  * @author Zohn

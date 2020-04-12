@@ -1,12 +1,17 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
 android {
-    compileSdkVersion 28
+    //noinspection GradleDependency
+    buildToolsVersion "$build_tools_version"
+    compileSdkVersion "$compile_sdk_version".toInteger()
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 28
+        minSdkVersion "$min_sdk_version".toInteger()
+        targetSdkVersion "$target_sdk_version".toInteger()
+
         versionCode 1
         versionName "1.0"
     }
@@ -23,11 +28,14 @@ android {
 }
 
 dependencies {
+    api 'org.slf4j:slf4j-api:1.7.30'
+    implementation "androidx.core:core-ktx:1.2.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 group 'com.jjmoo'
-version "$library_version_name"
-String artifactName = 'andutils'
+version "$library_logger_version"
+String artifactName = 'android-logger'
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 String nexusUserName = properties.get('nexus.username')
@@ -104,4 +112,7 @@ artifacts {
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
+}
+repositories {
+    mavenCentral()
 }

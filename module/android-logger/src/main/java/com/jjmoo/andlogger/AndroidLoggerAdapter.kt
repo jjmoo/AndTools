@@ -5,7 +5,7 @@ import com.jjmoo.andlogger.LogUtils.logDebug
 import org.slf4j.helpers.MarkerIgnoringBase
 import org.slf4j.helpers.MessageFormatter
 
-internal class AndroidLoggerAdapter(tag: String) : MarkerIgnoringBase() {
+class AndroidLoggerAdapter(tag: String) : MarkerIgnoringBase() {
     init {
         name = tag
     }
