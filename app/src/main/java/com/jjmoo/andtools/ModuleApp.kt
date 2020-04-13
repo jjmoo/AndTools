@@ -11,6 +11,6 @@ import org.slf4j.LoggerFactory
 class ModuleApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        LoggerFactory.getLogger("ADFD").debug("dff")
+        LoggerFactory.getLogger("ModuleApp").info("onCreate")
     }
 }
