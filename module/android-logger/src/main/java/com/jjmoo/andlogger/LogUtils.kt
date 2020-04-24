@@ -11,10 +11,10 @@ object LogUtils {
     private const val TAG_MAX_LENGTH = 40
 
     @JvmStatic
-    var prefix = "AndLogger"
+    var prefix = "JmLog/"
 
     @JvmStatic
-    var logDebug = false
+    var logDebug = true
 
     @JvmStatic
     var factory = ILoggerFactory { name ->
@@ -31,7 +31,7 @@ object LogUtils {
     @JvmStatic
     fun getCaller(): String {
         val stack = Thread.currentThread().stackTrace
-        return stack[4].simpleString() + "<--" + stack[5].simpleString()
+        return stack[4].simpleString() + " <-- " + stack[5].simpleString()
     }
 
     @JvmStatic
@@ -40,10 +40,10 @@ object LogUtils {
         val stack = Thread.currentThread().stackTrace
         val sb = StringBuilder(stack[4].simpleString())
         for (d in 2..depth) {
-            sb.append("<--").append(stack[d + 3].simpleString())
+            sb.append(" <-- ").append(stack[d + 3].simpleString())
         }
         return sb.toString()
     }
 
-    private fun StackTraceElement.simpleString() = "($fileName:$lineNumber)"
+    private fun StackTraceElement.simpleString() = "$methodName ($fileName:$lineNumber)"
 }
